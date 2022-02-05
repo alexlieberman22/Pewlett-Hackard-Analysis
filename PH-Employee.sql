@@ -51,53 +51,105 @@ SELECT * FROM dept_emp;
 SELECT * FROM salaries;
 SELECT * FROM retirement_info;
 SELECT * FROM current_emp;
+SELECT * FROM emp_info;
+SELECT * FROM manager_info;
 
-DROP TABLE retirement_info;
-DROP TABLE employees CASCADE;
-DROP TABLE dept_emp;
-DROP TABLE current_emp;
+-- DROP TABLE retirement_info;
+-- DROP TABLE employees CASCADE;
+-- DROP TABLE dept_emp;
+-- DROP TABLE current_emp;
+-- DROP TABLE emp_info;
 
-
+-- Create retirement_info
 SELECT emp_no, first_name, last_name
 INTO retirement_info
-From employees
-Where (birth_date Between '1952-01-01' And '1955-12-31')
+FROM employees
+WHERE (birth_date BETWEEN '1952-01-01' AND '1955-12-31')
 	AND (hire_date BETWEEN '1985-01-01' AND '1988-12-31');
 
-
+----
+-- departments of managers
 SELECT departments.dept_name,
 	dept_manager.emp_no,
 	dept_manager.from_date,
 	dept_manager.to_date
 FROM departments
-INNER JOIN dept_manager 
-ON departments.dept_no = dept_manager.dept_no;
+	INNER JOIN dept_manager 
+		ON departments.dept_no = dept_manager.dept_no;
 
-
-SELECT retirement_info.emp_no,
-    retirement_info.first_name,
-	retirement_info.last_name,
-    dept_emp.to_date
-FROM retirement_info
-LEFT JOIN dept_emp
-ON retirement_info.emp_no = dept_emp.emp_no;
-
-
+-- short cut way 
 SELECT d.dept_name,
      dm.emp_no,
      dm.from_date,
      dm.to_date
 FROM departments as d
-INNER JOIN dept_manager as dm
-ON d.dept_no = dm.dept_no;
-	 
-	 
+	INNER JOIN dept_manager as dm
+		ON d.dept_no = dm.dept_no;
+
+-- retirees end dates 
+SELECT retirement_info.emp_no,
+    retirement_info.first_name,
+	retirement_info.last_name,
+    dept_emp.to_date
+FROM retirement_info
+	LEFT JOIN dept_emp
+		ON retirement_info.emp_no = dept_emp.emp_no;
+
+----
+-- Find current employees, put into current_emp table	 
 SELECT ri.emp_no,
     ri.first_name,
     ri.last_name,
 	de.to_date
 INTO current_emp
 FROM retirement_info as ri
-LEFT JOIN dept_emp as de
-ON ri.emp_no = de.emp_no
+	LEFT JOIN dept_emp as de
+		ON ri.emp_no = de.emp_no
 WHERE de.to_date = ('9999-01-01');
+
+----
+-- employee count by department number
+SELECT de.dept_no, COUNT(ce.emp_no)
+FROM current_emp as ce
+	LEFT JOIN dept_emp as de
+		ON ce.emp_no = de.emp_no
+GROUP BY de.dept_no
+ORDER BY 1; --nifty trick
+
+-- ordered salaries
+SELECT *  FROM salaries
+ORDER BY to_date DESC;
+----
+
+-- Create emp_info
+SELECT ei.emp_no, ei.first_name, ei.last_name, ei.gender,
+    s.salary, de.to_date
+INTO emp_info
+FROM employees as ei
+	INNER JOIN salaries as s
+		ON ei.emp_no = s.emp_no
+	INNER JOIN dept_emp as de
+		ON ei.emp_no = de.emp_no
+WHERE ((ei.birth_date BETWEEN '1952-01-01' AND '1995-12-31')
+	  AND (ei.hire_date BETWEEN '1985-01-01' AND '1988-12-31')
+	  AND (de.to_date = '9999-01-01'));
+
+-- Create manager_info
+SELECT  dm.dept_no, d.dept_name, dm.emp_no,
+        ce.last_name, ce.first_name,
+        dm.from_date, dm.to_date
+INTO manager_info
+FROM dept_manager as dm
+    INNER JOIN departments as d
+        ON (dm.dept_no = d.dept_no)
+    INNER JOIN current_emp as ce
+        ON (dm.emp_no = ce.emp_no);
+		
+-- Create dept_info	
+SELECT ce.emp_no, ce.first_name, ce.last_name, d.dept_name
+-- INTO dept_info
+FROM current_emp as ce
+	INNER JOIN dept_emp AS de
+		ON (ce.emp_no = de.emp_no)
+	INNER JOIN departments AS d
+		ON (de.dept_no = d.dept_no);
