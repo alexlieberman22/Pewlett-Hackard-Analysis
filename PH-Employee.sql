@@ -44,6 +44,14 @@
 --   PRIMARY KEY (emp_no, dept_no)
 -- );
 
+-- CREATE TABLE titles(
+--    emp_no INT NOT NULL,
+--    title VARCHAR(30) NOT NULL,
+--    from_date DATE NOT NULL,
+--    to_date DATE NOT NULL,
+--    FOREIGN KEY (emp_no) REFERENCES employees (emp_no)
+-- );
+
 SELECT * FROM departments;
 SELECT * FROM employees;
 SELECT * FROM dept_manager;
@@ -59,6 +67,7 @@ SELECT * FROM manager_info;
 -- DROP TABLE dept_emp;
 -- DROP TABLE current_emp;
 -- DROP TABLE emp_info;
+-- DROP TABLE titles;
 
 -- Create retirement_info
 SELECT emp_no, first_name, last_name
