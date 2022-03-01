@@ -1,4 +1,4 @@
-# Pewlett-Hackard-Analysis
+# Pewlett Hackard Analysis
 
 ## Overview of the analysis: 
 Determine the total number of retiring employees by their title, and find which employees are eligible for the mentorship program.
